@@ -1,0 +1,297 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --afi-navy: #1a2c43;
+  --afi-red: #c0392b;
+  --afi-light-gray: #f8f9fa;
+  --afi-gray: #e9ecef;
+  --afi-dark-gray: #6c757d;
+}
+
+body {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--afi-light-gray);
+}
+
+.afi-header {
+  background-color: var(--afi-navy);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.afi-logo {
+  max-width: 150px;
+  height: auto;
+  width: auto;
+  object-fit: contain;
+}
+
+.afi-btn {
+  background-color: var(--afi-red);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.afi-btn:hover {
+  background-color: #a63224;
+  transform: translateY(-1px);
+}
+
+.afi-btn:active {
+  transform: translateY(0);
+}
+
+.afi-card {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+
+.afi-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.afi-section-title {
+  color: var(--afi-navy);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.afi-input {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  transition: all 0.2s;
+}
+
+.afi-input:focus {
+  border-color: var(--afi-navy);
+  box-shadow: 0 0 0 2px rgba(26, 44, 67, 0.1);
+  outline: none;
+}
+
+.afi-input-label {
+  color: var(--afi-navy);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.afi-tab {
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.afi-tab-active {
+  background-color: var(--afi-navy);
+  color: white;
+}
+
+.afi-tab-inactive {
+  background-color: var(--afi-gray);
+  color: var(--afi-navy);
+}
+
+.afi-tab-inactive:hover {
+  background-color: #dde1e6;
+}
+
+.afi-metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--afi-navy);
+}
+
+.afi-metric-label {
+  font-size: 0.85rem;
+  color: var(--afi-dark-gray);
+  font-weight: 500;
+}
+
+/* Toggle switch styling */
+.afi-toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.afi-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.afi-toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 26px;
+}
+
+.afi-toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.afi-toggle input:checked + .afi-toggle-slider {
+  background-color: var(--afi-red);
+}
+
+.afi-toggle input:checked + .afi-toggle-slider:before {
+  transform: translateX(24px);
+}
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--afi-navy);
+  color: white;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.75rem;
+  font-weight: 400;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Modal Styles */
+.afi-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.afi-modal {
+  position: relative;
+  background-color: white;
+  border-radius: 10px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Specific styles for PDF export container */
+.pdf-export-container {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.pdf-export-container * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.pdf-export-container img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Page break classes */
+.page-break-before {
+  page-break-before: always;
+}
+
+.page-break-after {
+  page-break-after: always;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background-color: white;
+  }
+  
+  .afi-header, 
+  .print:hidden,
+  button {
+    display: none !important;
+  }
+  
+  .container {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .afi-card {
+    box-shadow: none;
+    border: 1px solid #e0e0e0;
+    break-inside: avoid;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid;
+  }
+  
+  table {
+    break-inside: auto;
+  }
+  
+  tr {
+    break-inside: avoid;
+    break-after: auto;
+  }
+  
+  thead {
+    display: table-header-group;
+  }
+  
+  tfoot {
+    display: table-footer-group;
+  }
+}
