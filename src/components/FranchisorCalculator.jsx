@@ -1,10 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import InputPanel from './InputPanel';
 import OutputPanel from './OutputPanel';
 import { calculateProjections } from '../utils/calculations';
 
 const FranchisorCalculator = () => {
+  const inputPanelRef = useRef();
+  
+  // Initial state for inputs
   const [inputs, setInputs] = useState({
     // Franchise Network Profile
     units: 50,
@@ -54,16 +57,39 @@ const FranchisorCalculator = () => {
     includeCosts: true
   });
 
+  // Update input handler (now only called when blur or completed input)
   const updateInput = (key, value) => {
-    setInputs(prev => ({ ...prev, [key]: value }));
+    setInputs(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
   const updateToggle = (key, value) => {
-    setToggles(prev => ({ ...prev, [key]: value }));
+    setToggles(prev => ({
+      ...prev,
+      [key]: value
+    }));
   };
 
+  // Function to get the latest input values from InputPanel
+  const getLatestInputs = () => {
+    if (inputPanelRef.current) {
+      const latestInputs = InputPanel.getInputsData(inputPanelRef);
+      if (latestInputs) {
+        return {
+          ...inputs,
+          ...latestInputs
+        };
+      }
+    }
+    return inputs;
+  };
+
+  // Calculate projections using the latest input values
   const projections = useMemo(() => {
-    return calculateProjections(inputs, toggles);
+    const currentInputs = getLatestInputs();
+    return calculateProjections(currentInputs, toggles);
   }, [inputs, toggles]);
 
   return (
@@ -76,9 +102,20 @@ const FranchisorCalculator = () => {
         <h1 className="text-4xl font-bold text-[#1a2c43] mb-2">
           Franchisor Earnings Calculator
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 mb-6">
           Accurately model your franchise business potential
         </p>
+        {/* Earnings Disclaimer */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="max-w-4xl mx-auto mb-2"
+        >
+          <p className="text-sm text-gray-500 italic leading-relaxed">
+            <strong>Earnings Disclaimer:</strong> The financial projections provided by this calculator are estimates based on the inputs you provide and are for illustrative purposes only. Actual results may vary significantly and depend on numerous factors including market conditions, location, management effectiveness, economic factors, and other variables beyond our control. Past performance or projected earnings do not guarantee future results. You should conduct your own due diligence and consult with qualified financial and legal advisors before making any business decisions.
+          </p>
+        </motion.div>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -87,27 +124,27 @@ const FranchisorCalculator = () => {
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <InputPanel
-            inputs={inputs}
-            toggles={toggles}
-            updateInput={updateInput}
-            updateToggle={updateToggle}
+          <InputPanel 
+            ref={inputPanelRef}
+            inputs={inputs} 
+            toggles={toggles} 
+            updateInput={updateInput} 
+            updateToggle={updateToggle} 
           />
         </motion.div>
-
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <OutputPanel
-            projections={projections}
-            toggles={toggles}
-            inputs={inputs}
+          <OutputPanel 
+            projections={projections} 
+            toggles={toggles} 
+            inputs={inputs} 
           />
         </motion.div>
       </div>
-      
+
       <div className="text-center text-sm text-gray-500 mt-12 pb-8">
         © {new Date().getFullYear()} Accurate Franchising, Inc. All rights reserved.
       </div>

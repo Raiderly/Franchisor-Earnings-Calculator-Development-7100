@@ -2,22 +2,29 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
-import ProjectionChart from './ProjectionChart';
 import { formatCurrency, formatNumber } from '../utils/formatters';
-import ExportOptions from './export/ExportOptions';
-import EmailModal from './export/EmailModal';
-
-const { FiDollarSign, FiTrendingUp, FiUsers, FiBarChart2, FiDownload, FiPieChart, FiMail, FiFileText } = FiIcons;
+import { exportToCsv } from '../utils/csvExport';
 
 const OutputPanel = ({ projections, toggles, inputs }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-
+  
+  if (!projections || projections.length === 0) {
+    return (
+      <div className="afi-card p-6 flex flex-col items-center justify-center min-h-[400px]">
+        <SafeIcon icon={FiIcons.FiAlertCircle} className="w-12 h-12 text-gray-400 mb-4" />
+        <h3 className="text-xl font-bold text-gray-500 mb-2">No Data Available</h3>
+        <p className="text-gray-500 text-center max-w-md">
+          Please complete the calculator inputs to generate financial projections.
+        </p>
+      </div>
+    );
+  }
+  
   const currentYear = projections[0];
   const totalRevenue = currentYear.grossRevenue;
   const netProfit = currentYear.netProfit;
   const revenuePerUnit = totalRevenue / currentYear.units;
-
+  
   const MetricCard = ({ icon, title, value, subtitle, color = 'blue' }) => (
     <div className="afi-card p-5">
       <div className="flex items-center">
@@ -32,7 +39,7 @@ const OutputPanel = ({ projections, toggles, inputs }) => {
       </div>
     </div>
   );
-
+  
   const RevenueStreamCard = ({ title, amount, percentage }) => (
     <div className="afi-card p-4 border-l-4 border-[#1a2c43]">
       <div className="flex justify-between items-center mb-1">
@@ -42,16 +49,16 @@ const OutputPanel = ({ projections, toggles, inputs }) => {
       <p className="text-lg font-bold text-[#1a2c43]">{formatCurrency(amount)}</p>
     </div>
   );
-
+  
   const TabButton = ({ id, label, isActive, onClick }) => (
-    <button
-      onClick={() => onClick(id)}
+    <button 
+      onClick={() => onClick(id)} 
       className={`afi-tab ${isActive ? 'afi-tab-active' : 'afi-tab-inactive'}`}
     >
       {label}
     </button>
   );
-
+  
   const ProjectionTable = () => (
     <div className="afi-card overflow-hidden">
       <div className="p-5 border-b border-gray-200">
@@ -121,117 +128,119 @@ const OutputPanel = ({ projections, toggles, inputs }) => {
       </div>
     </div>
   );
-
+  
+  // Get all revenue streams
   const revenueStreams = [
     { title: 'Royalty Income', amount: currentYear.royaltyIncome, key: 'royaltyIncome' },
     { title: 'Initial Franchise Fees', amount: currentYear.initialFees, key: 'initialFees' },
     { title: 'Renewal Fees', amount: currentYear.renewalFees, key: 'renewalFees' },
-    {
-      title: 'Training Fees',
-      amount: currentYear.trainingIncome + currentYear.trainingRecurringIncome,
-      key: 'training'
-    },
+    { title: 'Training Fees', amount: currentYear.trainingIncome + currentYear.trainingRecurringIncome, key: 'training' },
     { title: 'Technology Fees', amount: currentYear.techIncome, key: 'techIncome' },
     { title: 'Admin/Support Fees', amount: currentYear.supportIncome, key: 'supportIncome' },
     { title: 'Transfer Fees', amount: currentYear.transferIncome, key: 'transferIncome' },
   ];
-
+  
   if (toggles.supplyChain) {
-    revenueStreams.push({
-      title: 'Supply Chain Margin',
-      amount: currentYear.supplyChainIncome,
-      key: 'supplyChainIncome'
+    revenueStreams.push({ 
+      title: 'Supply Chain Margin', 
+      amount: currentYear.supplyChainIncome, 
+      key: 'supplyChainIncome' 
     });
   }
-
+  
   if (toggles.marketingIncome) {
-    revenueStreams.push({
-      title: 'Marketing Levy Income',
-      amount: currentYear.marketingIncome,
-      key: 'marketingIncome'
+    revenueStreams.push({ 
+      title: 'Marketing Levy Income', 
+      amount: currentYear.marketingIncome, 
+      key: 'marketingIncome' 
     });
   }
-
+  
   if (toggles.masterFranchise) {
-    revenueStreams.push({
-      title: 'Master Franchise Fees',
-      amount: currentYear.masterFranchiseFees,
-      key: 'masterFranchiseFees'
+    revenueStreams.push({ 
+      title: 'Master Franchise Fees', 
+      amount: currentYear.masterFranchiseFees, 
+      key: 'masterFranchiseFees' 
     });
-    revenueStreams.push({
-      title: 'Master Override Income',
-      amount: currentYear.masterOverrideIncome,
-      key: 'masterOverrideIncome'
+    revenueStreams.push({ 
+      title: 'Master Override Income', 
+      amount: currentYear.masterOverrideIncome, 
+      key: 'masterOverrideIncome' 
     });
   }
+  
+  // Handle CSV export
+  const handleExport = async () => {
+    try {
+      await exportToCsv(inputs, projections, toggles);
+    } catch (error) {
+      console.error('Export failed:', error);
+      // Show error message to user
+    }
+  };
 
   return (
     <div className="space-y-6">
       {/* Export Button - Top Right */}
       <div className="flex justify-end">
-        <ExportOptions 
-          inputs={inputs}
-          projections={projections}
-          toggles={toggles}
-          openEmailModal={() => setIsEmailModalOpen(true)}
-        />
+        <button
+          onClick={handleExport}
+          className="afi-btn flex items-center"
+        >
+          <SafeIcon icon={FiIcons.FiDownload} className="mr-2" />
+          Export CSV
+        </button>
       </div>
       
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MetricCard
-          icon={FiDollarSign}
-          title="TOTAL ANNUAL REVENUE"
-          value={formatCurrency(totalRevenue)}
-          subtitle="Current Year"
+        <MetricCard 
+          icon={FiIcons.FiDollarSign} 
+          title="TOTAL ANNUAL REVENUE" 
+          value={formatCurrency(totalRevenue)} 
+          subtitle="Current Year" 
         />
-        <MetricCard
-          icon={FiUsers}
-          title="REVENUE PER UNIT"
-          value={formatCurrency(revenuePerUnit)}
-          subtitle="Annual Average"
+        <MetricCard 
+          icon={FiIcons.FiUsers} 
+          title="REVENUE PER UNIT" 
+          value={formatCurrency(revenuePerUnit)} 
+          subtitle="Annual Average" 
         />
         {toggles.includeCosts && (
           <>
-            <MetricCard
-              icon={FiTrendingUp}
-              title="NET PROFIT"
-              value={formatCurrency(netProfit)}
-              subtitle={`${((netProfit / totalRevenue) * 100).toFixed(1)}% margin`}
+            <MetricCard 
+              icon={FiIcons.FiTrendingUp} 
+              title="NET PROFIT" 
+              value={formatCurrency(netProfit)} 
+              subtitle={`${((netProfit / totalRevenue) * 100).toFixed(1)}% margin`} 
             />
-            <MetricCard
-              icon={FiBarChart2}
-              title="TOTAL COSTS"
-              value={formatCurrency(currentYear.totalCosts)}
-              subtitle="Annual Operating Costs"
+            <MetricCard 
+              icon={FiIcons.FiBarChart2} 
+              title="TOTAL COSTS" 
+              value={formatCurrency(currentYear.totalCosts)} 
+              subtitle="Annual Operating Costs" 
             />
           </>
         )}
       </div>
-
+      
       {/* Tabs */}
       <div className="afi-card p-6">
-        <div className="flex space-x-2 mb-6 border-b border-gray-200 pb-3">
-          <TabButton
-            id="overview"
-            label="Revenue Streams"
-            isActive={activeTab === 'overview'}
-            onClick={setActiveTab}
+        <div className="flex space-x-2 mb-6 border-b border-gray-200 pb-3 overflow-x-auto">
+          <TabButton 
+            id="overview" 
+            label="Revenue Streams" 
+            isActive={activeTab === 'overview'} 
+            onClick={setActiveTab} 
           />
-          <TabButton
-            id="projections"
-            label="Projections"
-            isActive={activeTab === 'projections'}
-            onClick={setActiveTab}
-          />
-          <TabButton
-            id="chart"
-            label="Growth Chart"
-            isActive={activeTab === 'chart'}
-            onClick={setActiveTab}
+          <TabButton 
+            id="projections" 
+            label="Projections Table" 
+            isActive={activeTab === 'projections'} 
+            onClick={setActiveTab} 
           />
         </div>
-
+        
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 20 }}
@@ -241,44 +250,34 @@ const OutputPanel = ({ projections, toggles, inputs }) => {
           {activeTab === 'overview' && (
             <div className="space-y-4">
               <div className="flex items-center mb-4">
-                <SafeIcon icon={FiPieChart} className="text-[#1a2c43] w-5 h-5 mr-2" />
+                <SafeIcon icon={FiIcons.FiPieChart} className="text-[#1a2c43] w-5 h-5 mr-2" />
                 <h3 className="text-lg font-bold text-[#1a2c43]">
                   Revenue Breakdown - Year 1
                 </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {revenueStreams.map((stream) => (
-                  <RevenueStreamCard
-                    key={stream.key}
-                    title={stream.title}
-                    amount={stream.amount}
-                    percentage={(stream.amount / totalRevenue) * 100}
-                  />
-                ))}
+                {revenueStreams
+                  .sort((a, b) => b.amount - a.amount) // Sort by amount descending
+                  .map((stream) => (
+                    <RevenueStreamCard
+                      key={stream.key}
+                      title={stream.title}
+                      amount={stream.amount}
+                      percentage={(stream.amount / totalRevenue) * 100}
+                    />
+                  ))}
               </div>
             </div>
           )}
-
+          
           {activeTab === 'projections' && <ProjectionTable />}
-
-          {activeTab === 'chart' && (
-            <div className="space-y-4">
-              <div className="flex items-center mb-4">
-                <SafeIcon icon={FiBarChart2} className="text-[#1a2c43] w-5 h-5 mr-2" />
-                <h3 className="text-lg font-bold text-[#1a2c43]">
-                  Revenue Growth Projection
-                </h3>
-              </div>
-              <ProjectionChart projections={projections} toggles={toggles} />
-            </div>
-          )}
         </motion.div>
       </div>
-
+      
       {/* Summary Stats */}
       <div className="afi-card p-6">
         <div className="flex items-center mb-4">
-          <SafeIcon icon={FiTrendingUp} className="text-[#1a2c43] w-5 h-5 mr-2" />
+          <SafeIcon icon={FiIcons.FiTrendingUp} className="text-[#1a2c43] w-5 h-5 mr-2" />
           <h3 className="text-lg font-bold text-[#1a2c43]">
             {inputs.projectionYears}-YEAR SUMMARY
           </h3>
@@ -306,15 +305,6 @@ const OutputPanel = ({ projections, toggles, inputs }) => {
           </div>
         </div>
       </div>
-      
-      {/* Email Modal */}
-      <EmailModal 
-        isOpen={isEmailModalOpen} 
-        onClose={() => setIsEmailModalOpen(false)}
-        inputs={inputs}
-        projections={projections}
-        toggles={toggles}
-      />
     </div>
   );
 };

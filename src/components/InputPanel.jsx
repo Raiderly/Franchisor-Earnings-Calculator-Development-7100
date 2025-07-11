@@ -1,372 +1,310 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import * as FiIcons from 'react-icons/fi';
-import SafeIcon from '../common/SafeIcon';
+import React, { useState } from "react";
+import { useCalculator } from "../context/CalculatorContext";
+import InputField from "./inputs/InputField";
+import Toggle from "./inputs/Toggle";
+import InputSection from "./inputs/InputSection";
+import * as FiIcons from "react-icons/fi";
+import SafeIcon from "./common/SafeIcon";
+import { motion } from "framer-motion";
 
-const { FiInfo, FiToggleLeft, FiToggleRight } = FiIcons;
+const InputPanel = () => {
+  const { inputs } = useCalculator();
+  const [activeSection, setActiveSection] = useState('basic');
 
-const InputPanel = ({ inputs, toggles, updateInput, updateToggle }) => {
-  const Toggle = ({ label, value, onChange, tooltip }) => (
-    <div className="flex items-center justify-between p-3 bg-[#f8f9fa] rounded-lg mb-3 border border-gray-200">
-      <div className="flex items-center space-x-2">
-        <span className="font-medium text-[#1a2c43]">{label}</span>
-        {tooltip && (
-          <div className="tooltip">
-            <SafeIcon icon={FiInfo} className="w-4 h-4 text-[#c0392b] cursor-help" />
-            <div className="tooltip-text">
-              {tooltip}
-            </div>
-          </div>
-        )}
-      </div>
-      <label className="afi-toggle">
-        <input
-          type="checkbox"
-          checked={value}
-          onChange={() => onChange(!value)}
-        />
-        <span className="afi-toggle-slider"></span>
-      </label>
-    </div>
-  );
-
-  const InputField = ({ label, value, onChange, type = 'number', prefix = '', suffix = '', tooltip }) => (
-    <div className="space-y-2 mb-4">
-      <div className="flex items-center space-x-2">
-        <label className="afi-input-label">{label}</label>
-        {tooltip && (
-          <div className="tooltip">
-            <SafeIcon icon={FiInfo} className="w-4 h-4 text-[#c0392b] cursor-help" />
-            <div className="tooltip-text">
-              {tooltip}
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="relative">
-        {prefix && (
-          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-            {prefix}
-          </span>
-        )}
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-          className={`w-full px-3 py-2 afi-input ${
-            prefix ? 'pl-8' : ''
-          } ${suffix ? 'pr-12' : ''}`}
-        />
-        {suffix && (
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-            {suffix}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-
-  const Section = ({ title, children, className = '' }) => (
-    <div className={`afi-card p-6 mb-6 ${className}`}>
-      <h3 className="afi-section-title">{title}</h3>
-      <div>
-        {children}
-      </div>
-    </div>
-  );
+  const sections = [
+    { id: 'basic', label: 'Basic Info', icon: FiIcons.FiInfo },
+    { id: 'fees', label: 'Fees', icon: FiIcons.FiDollarSign },
+    { id: 'advanced', label: 'Advanced', icon: FiIcons.FiSettings },
+    { id: 'costs', label: 'Costs', icon: FiIcons.FiMinusCircle }
+  ];
 
   return (
-    <div>
-      {/* Toggles */}
-      <Section title="CALCULATION OPTIONS">
-        <Toggle
-          label="Master Franchise Model"
-          value={toggles.masterFranchise}
-          onChange={(value) => updateToggle('masterFranchise', value)}
-          tooltip="Enable if you plan to sell master franchise territories"
-        />
-        <Toggle
-          label="Supply Chain Margin"
-          value={toggles.supplyChain}
-          onChange={(value) => updateToggle('supplyChain', value)}
-          tooltip="Include revenue from supply chain margins"
-        />
-        <Toggle
-          label="Marketing Levy as Income"
-          value={toggles.marketingIncome}
-          onChange={(value) => updateToggle('marketingIncome', value)}
-          tooltip="Count marketing levies as franchisor income (vs. pass-through)"
-        />
-        <Toggle
-          label="Include Costs / Show Net Profit"
-          value={toggles.includeCosts}
-          onChange={(value) => updateToggle('includeCosts', value)}
-          tooltip="Include operational costs to calculate net profit"
-        />
-      </Section>
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-600 to-slate-700 p-4">
+        <h2 className="text-xl font-bold text-white flex items-center">
+          <SafeIcon icon={FiIcons.FiSliders} className="w-5 h-5 mr-2" />
+          Calculator Inputs
+        </h2>
+      </div>
 
-      {/* Franchise Network Profile */}
-      <Section title="FRANCHISE NETWORK PROFILE">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField
-            label="Current Franchise Units"
-            value={inputs.units}
-            onChange={(value) => updateInput('units', value)}
-            tooltip="Number of franchise units currently operating"
-          />
-          <InputField
-            label="New Units Per Year"
-            value={inputs.newUnitsPerYear}
-            onChange={(value) => updateInput('newUnitsPerYear', value)}
-            tooltip="Expected new franchise units to be added annually"
-          />
-          <InputField
-            label="Average Franchise Term"
-            value={inputs.termYears}
-            onChange={(value) => updateInput('termYears', value)}
-            suffix="years"
-            tooltip="Average length of franchise agreements"
-          />
-          <InputField
-            label="Growth Rate"
-            value={inputs.growthRate}
-            onChange={(value) => updateInput('growthRate', value)}
-            suffix="%"
-            tooltip="Annual growth rate of existing units"
-          />
-          <InputField
-            label="Churn Rate"
-            value={inputs.churnRate}
-            onChange={(value) => updateInput('churnRate', value)}
-            suffix="%"
-            tooltip="Percentage of units that exit the system annually"
-          />
-          <InputField
-            label="Projection Duration"
-            value={inputs.projectionYears}
-            onChange={(value) => updateInput('projectionYears', value)}
-            suffix="years"
-            tooltip="Number of years to project forward"
-          />
-        </div>
-      </Section>
-
-      {/* Financial Inputs */}
-      <Section title="FINANCIAL INPUTS">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <InputField
-            label="Average Gross Sales per Unit"
-            value={inputs.avgSales}
-            onChange={(value) => updateInput('avgSales', value)}
-            prefix="$"
-            tooltip="Annual gross sales per franchise unit"
-          />
-          <InputField
-            label="Royalty Percentage"
-            value={inputs.royaltyPct}
-            onChange={(value) => updateInput('royaltyPct', value)}
-            suffix="%"
-            tooltip="Percentage of gross sales paid as royalties"
-          />
-          <InputField
-            label="Marketing Levy"
-            value={inputs.marketingPct}
-            onChange={(value) => updateInput('marketingPct', value)}
-            suffix="%"
-            tooltip="Percentage of gross sales for marketing fund"
-          />
-          <InputField
-            label="Initial Franchise Fee"
-            value={inputs.franchiseFee}
-            onChange={(value) => updateInput('franchiseFee', value)}
-            prefix="$"
-            tooltip="One-time fee paid by new franchisees"
-          />
-          <InputField
-            label="Renewal Fee"
-            value={inputs.renewalFee}
-            onChange={(value) => updateInput('renewalFee', value)}
-            prefix="$"
-            tooltip="Fee paid when franchise agreement is renewed"
-          />
-          <InputField
-            label="Transfer Fee"
-            value={inputs.transferFee}
-            onChange={(value) => updateInput('transferFee', value)}
-            prefix="$"
-            tooltip="Fee paid when franchise is sold to new owner"
-          />
-          <InputField
-            label="Resale Frequency"
-            value={inputs.resaleFreq}
-            onChange={(value) => updateInput('resaleFreq', value)}
-            suffix="years"
-            tooltip="Average years before a franchise is sold"
-          />
-          <InputField
-            label="Training Fee (Initial)"
-            value={inputs.trainingFee}
-            onChange={(value) => updateInput('trainingFee', value)}
-            prefix="$"
-            tooltip="One-time training fee for new franchisees"
-          />
-          <InputField
-            label="Recurring Training Fee"
-            value={inputs.trainingAnnualFee}
-            onChange={(value) => updateInput('trainingAnnualFee', value)}
-            prefix="$"
-            tooltip="Annual training fee per franchise unit"
-          />
-          <InputField
-            label="Technology Fee (Monthly)"
-            value={inputs.techFee}
-            onChange={(value) => updateInput('techFee', value)}
-            prefix="$"
-            tooltip="Monthly technology fee per franchise unit"
-          />
-          <InputField
-            label="Admin/Support Fee (Monthly)"
-            value={inputs.supportFee}
-            onChange={(value) => updateInput('supportFee', value)}
-            prefix="$"
-            tooltip="Monthly administrative support fee per unit"
-          />
-        </div>
-        
-        <AnimatePresence>
-          {toggles.supplyChain && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-gray-200"
-            >
-              <InputField
-                label="Annual Supply Chain Spend per Unit"
-                value={inputs.supplySpend}
-                onChange={(value) => updateInput('supplySpend', value)}
-                prefix="$"
-                tooltip="Average annual spend per unit on supply chain"
-              />
-              <InputField
-                label="Supply Chain Margin"
-                value={inputs.supplyMarginPct}
-                onChange={(value) => updateInput('supplyMarginPct', value)}
-                suffix="%"
-                tooltip="Franchisor margin on supply chain sales"
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </Section>
-
-      {/* Master Franchise Section */}
-      <AnimatePresence>
-        {toggles.masterFranchise && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+      {/* Section Tabs */}
+      <div className="flex border-b border-gray-200 bg-gray-50">
+        {sections.map((section) => (
+          <button
+            key={section.id}
+            onClick={() => setActiveSection(section.id)}
+            className={`flex-1 py-3 px-2 text-sm font-medium flex items-center justify-center space-x-1 transition-colors ${
+              activeSection === section.id
+                ? 'bg-blue-500 text-white border-b-2 border-blue-600'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
           >
-            <Section title="MASTER FRANCHISE MODELLING">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField
-                  label="Number of Master Territories"
-                  value={inputs.masterTerritories}
-                  onChange={(value) => updateInput('masterTerritories', value)}
-                  tooltip="Number of master franchise territories"
+            <SafeIcon icon={section.icon} className="w-4 h-4" />
+            <span className="hidden sm:inline">{section.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="p-6 max-h-96 overflow-y-auto">
+        <motion.div
+          key={activeSection}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {activeSection === 'basic' && (
+            <InputSection title="Basic Franchise Information">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField 
+                  label="Current Units" 
+                  field="units" 
+                  tooltip="Number of existing franchise units"
                 />
-                <InputField
-                  label="Franchisor Share of Royalty"
-                  value={inputs.masterRoyaltyPct}
-                  onChange={(value) => updateInput('masterRoyaltyPct', value)}
-                  suffix="%"
-                  tooltip="Percentage of royalties retained by franchisor"
+                <InputField 
+                  label="Average Unit Sales" 
+                  field="avgSales" 
+                  prefix="$" 
+                  tooltip="Annual gross sales per franchise unit"
                 />
-                <InputField
-                  label="Franchisor Share of Initial Fees"
-                  value={inputs.masterInitPct}
-                  onChange={(value) => updateInput('masterInitPct', value)}
-                  suffix="%"
-                  tooltip="Percentage of initial fees retained by franchisor"
+                <InputField 
+                  label="Royalty Rate" 
+                  field="royaltyRate" 
+                  suffix="%" 
+                  step="0.1"
+                  tooltip="Percentage of gross sales paid as royalty"
                 />
-                <InputField
-                  label="Master Franchise Fee"
-                  value={inputs.masterFee}
-                  onChange={(value) => updateInput('masterFee', value)}
-                  prefix="$"
-                  tooltip="One-time fee for master franchise territory"
+                <InputField 
+                  label="Marketing Levy" 
+                  field="marketingLevy" 
+                  suffix="%" 
+                  step="0.1"
+                  tooltip="Percentage for marketing fund"
                 />
-                <InputField
-                  label="Master Ongoing Override"
-                  value={inputs.masterOngoingPct}
-                  onChange={(value) => updateInput('masterOngoingPct', value)}
-                  suffix="%"
-                  tooltip="Ongoing percentage override from master territories"
+                <InputField 
+                  label="Growth Rate" 
+                  field="growthRate" 
+                  suffix="%" 
+                  tooltip="Expected annual growth rate"
+                />
+                <InputField 
+                  label="Churn Rate" 
+                  field="churnRate" 
+                  suffix="%" 
+                  tooltip="Annual franchisee attrition rate"
+                />
+                <InputField 
+                  label="New Units/Year" 
+                  field="newUnitsPerYear" 
+                  tooltip="New franchise units added annually"
+                />
+                <InputField 
+                  label="Franchise Term" 
+                  field="franchiseeTerm" 
+                  suffix="years"
+                  tooltip="Length of franchise agreement"
                 />
               </div>
-            </Section>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </InputSection>
+          )}
 
-      {/* Costs Section */}
-      <AnimatePresence>
-        {toggles.includeCosts && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-          >
-            <Section title="COST MODELLING">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField
-                  label="Staff Costs (Annual)"
-                  value={inputs.costStaff}
-                  onChange={(value) => updateInput('costStaff', value)}
+          {activeSection === 'fees' && (
+            <InputSection title="Franchise Fees">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField 
+                  label="Initial Franchise Fee" 
+                  field="franchiseFee" 
                   prefix="$"
-                  tooltip="Total annual staff costs"
+                  tooltip="One-time fee for new franchisees"
                 />
-                <InputField
-                  label="Recruitment Cost per New Franchisee"
-                  value={inputs.costRecruitment}
-                  onChange={(value) => updateInput('costRecruitment', value)}
+                <InputField 
+                  label="Renewal Fee" 
+                  field="renewalFee" 
                   prefix="$"
+                  tooltip="Fee for renewing franchise agreement"
+                />
+                <InputField 
+                  label="Transfer Fee" 
+                  field="transferFee" 
+                  prefix="$"
+                  tooltip="Fee for transferring franchise ownership"
+                />
+                <InputField 
+                  label="Training Fee" 
+                  field="trainingFee" 
+                  prefix="$"
+                  tooltip="Initial training fee per franchisee"
+                />
+                <InputField 
+                  label="Technology Fee" 
+                  field="techFee" 
+                  prefix="$" 
+                  suffix="/month"
+                  tooltip="Monthly technology/software fee"
+                />
+                <InputField 
+                  label="Support Fee" 
+                  field="supportFee" 
+                  prefix="$" 
+                  suffix="/month"
+                  tooltip="Monthly ongoing support fee"
+                />
+              </div>
+            </InputSection>
+          )}
+
+          {activeSection === 'advanced' && (
+            <InputSection title="Advanced Options">
+              <div className="space-y-4">
+                <Toggle 
+                  label="Supply Chain Revenue" 
+                  field="useSupply"
+                  description="Include revenue from supply chain operations"
+                />
+                {inputs.useSupply && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-6 p-4 bg-blue-50 rounded-lg">
+                    <InputField 
+                      label="Annual Supply Spend" 
+                      field="supplySpend" 
+                      prefix="$"
+                      tooltip="Annual spending per unit on supplies"
+                    />
+                    <InputField 
+                      label="Supply Margin" 
+                      field="supplyMargin" 
+                      suffix="%" 
+                      step="0.1"
+                      tooltip="Profit margin on supply sales"
+                    />
+                  </div>
+                )}
+
+                <Toggle 
+                  label="Management Service Provider" 
+                  field="useMSP"
+                  description="Include MSP revenue streams"
+                />
+                {inputs.useMSP && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-6 p-4 bg-green-50 rounded-lg">
+                    <InputField 
+                      label="MSP Monthly Fee" 
+                      field="mspFee" 
+                      prefix="$" 
+                      suffix="/month"
+                      tooltip="Monthly MSP fee per unit"
+                    />
+                    <InputField 
+                      label="MSP Services" 
+                      field="mspServices" 
+                      prefix="$"
+                      tooltip="Annual MSP services revenue per unit"
+                    />
+                  </div>
+                )}
+
+                <Toggle 
+                  label="Master Franchise Model" 
+                  field="useMasterFranchise"
+                  description="Include master franchise revenue sharing"
+                />
+                {inputs.useMasterFranchise && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-6 p-4 bg-purple-50 rounded-lg">
+                    <InputField 
+                      label="Franchisor Share" 
+                      field="masterSplit" 
+                      suffix="%" 
+                      tooltip="Percentage retained by franchisor"
+                    />
+                    <InputField 
+                      label="Master Franchise Fee" 
+                      field="masterFee" 
+                      prefix="$"
+                      tooltip="Initial fee for master franchise rights"
+                    />
+                    <InputField 
+                      label="Master Territories" 
+                      field="masterTerritories" 
+                      tooltip="Number of master franchise territories"
+                    />
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <InputField 
+                    label="Projection Years" 
+                    field="projectionYears" 
+                    tooltip="Number of years to project"
+                    min="1"
+                    max="10"
+                  />
+                  <div className="flex items-center">
+                    <Toggle 
+                      label="Include Operating Costs" 
+                      field="includeCosts"
+                      description="Show net profit calculations"
+                    />
+                  </div>
+                </div>
+              </div>
+            </InputSection>
+          )}
+
+          {activeSection === 'costs' && inputs.includeCosts && (
+            <InputSection title="Operating Costs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField 
+                  label="Staff Costs" 
+                  field="staffCosts" 
+                  prefix="$" 
+                  suffix="/year"
+                  tooltip="Annual staff and salary costs"
+                />
+                <InputField 
+                  label="Recruitment Cost" 
+                  field="recruitmentCost" 
+                  prefix="$" 
+                  suffix="/unit"
                   tooltip="Cost to recruit each new franchisee"
                 />
-                <InputField
-                  label="Training Delivery Cost"
-                  value={inputs.costTraining}
-                  onChange={(value) => updateInput('costTraining', value)}
-                  prefix="$"
-                  tooltip="Cost to deliver training per new franchisee"
+                <InputField 
+                  label="Training Costs" 
+                  field="trainingCost" 
+                  prefix="$" 
+                  suffix="/unit"
+                  tooltip="Cost to train each new franchisee"
                 />
-                <InputField
-                  label="Tech Licensing Cost per Unit"
-                  value={inputs.costTech}
-                  onChange={(value) => updateInput('costTech', value)}
-                  prefix="$"
-                  tooltip="Monthly tech licensing cost per unit"
+                <InputField 
+                  label="Technology Costs" 
+                  field="techCosts" 
+                  prefix="$" 
+                  suffix="/year"
+                  tooltip="Annual technology and software costs"
                 />
-                <InputField
-                  label="Legal & Compliance Costs"
-                  value={inputs.costLegal}
-                  onChange={(value) => updateInput('costLegal', value)}
-                  prefix="$"
+                <InputField 
+                  label="Legal & Compliance" 
+                  field="legalCosts" 
+                  prefix="$" 
+                  suffix="/year"
                   tooltip="Annual legal and compliance costs"
                 />
-                <InputField
-                  label="Marketing Fund Admin Overhead"
-                  value={inputs.costMarketingAdmin}
-                  onChange={(value) => updateInput('costMarketingAdmin', value)}
-                  prefix="$"
-                  tooltip="Annual cost to administer marketing fund"
+                <InputField 
+                  label="Marketing Admin" 
+                  field="marketingAdminCosts" 
+                  prefix="$" 
+                  suffix="/year"
+                  tooltip="Marketing fund administration costs"
                 />
               </div>
-            </Section>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </InputSection>
+          )}
+
+          {activeSection === 'costs' && !inputs.includeCosts && (
+            <div className="text-center py-8 text-gray-500">
+              <SafeIcon icon={FiIcons.FiInfo} className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p>Enable "Include Operating Costs" in Advanced section to configure cost inputs.</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 };

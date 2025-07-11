@@ -1,48 +1,15 @@
 import React, { useState } from 'react';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../../common/SafeIcon';
-import { exportToPdf } from '../../utils/pdfExport';
 import { exportToCsv } from '../../utils/csvExport';
-import { formatDate } from '../../utils/formatters';
 
-const { FiDownload, FiFilePlus, FiFileText, FiMail, FiPrinter, FiEye } = FiIcons;
+const { FiDownload, FiFilePlus, FiFileText, FiPrinter, FiEye } = FiIcons;
 
-const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
+const ExportOptions = ({ inputs, projections, toggles }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-
-  const handlePdfExport = async () => {
-    setIsExporting(true);
-    setExportError(null);
-    
-    try {
-      // Validate data before export
-      if (!projections || projections.length === 0) {
-        throw new Error('No projection data available. Please ensure calculations are complete.');
-      }
-      
-      if (!inputs || !inputs.units) {
-        throw new Error('No input data available. Please complete the form first.');
-      }
-      
-      console.log('Initiating PDF export...');
-      console.log('Data validation passed');
-      
-      // Wait a moment to ensure all UI updates are complete
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      await exportToPdf(inputs, projections, toggles);
-      console.log('PDF export completed successfully');
-      
-    } catch (error) {
-      console.error('PDF export failed:', error);
-      setExportError(`PDF export failed: ${error.message}. Please try the email option instead.`);
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   const handleCsvExport = async () => {
     setIsExporting(true);
@@ -83,47 +50,26 @@ const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
                 <SafeIcon icon={FiIcons.FiX} className="w-6 h-6" />
               </button>
             </div>
-            
             <div className="text-center py-8">
               <div className="mb-6">
                 <img 
                   src="https://app1.sharemyimage.com/2025/07/07/Accurate-Franchising-Logo-1.webp" 
                   alt="Accurate Franchising Inc." 
-                  className="max-w-[200px] mx-auto mb-4"
+                  className="max-w-[200px] mx-auto mb-4" 
                 />
                 <h1 className="text-2xl font-bold text-[#1a2c43] mb-2">Franchisor Earnings Report</h1>
                 <p className="text-gray-600">Generated on {new Date().toLocaleDateString()}</p>
               </div>
-              
               <div className="bg-gray-50 p-6 rounded-lg mb-6">
-                <h3 className="text-lg font-semibold text-[#1a2c43] mb-4">Your report will include:</h3>
+                <h3 className="text-lg font-semibold text-[#1a2c43] mb-4">Available export options:</h3>
                 <ul className="text-left max-w-md mx-auto space-y-2">
-                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Complete financial projections</li>
-                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Revenue breakdown by stream</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Download as CSV spreadsheet</li>
+                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Print-friendly view</li>
                   <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> {projections.length}-year financial forecast</li>
-                  <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> Unit growth projections</li>
                   <li className="flex items-center"><span className="text-green-600 mr-2">✓</span> All input parameters</li>
                 </ul>
               </div>
-              
               <div className="flex justify-center space-x-4">
-                <button 
-                  onClick={handlePdfExport}
-                  disabled={!hasValidData || isExporting}
-                  className="afi-btn flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isExporting ? (
-                    <>
-                      <span className="inline-block w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <SafeIcon icon={FiDownload} className="mr-2" />
-                      Download PDF
-                    </>
-                  )}
-                </button>
                 <button 
                   onClick={handleCsvExport}
                   disabled={!hasValidData}
@@ -133,22 +79,21 @@ const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
                   Download CSV
                 </button>
                 <button 
-                  onClick={openEmailModal}
-                  disabled={!hasValidData}
-                  className="afi-btn bg-gray-600 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={handlePrintView}
+                  className="afi-btn flex items-center"
                 >
-                  <SafeIcon icon={FiMail} className="mr-2" />
-                  Email Report
+                  <SafeIcon icon={FiPrinter} className="mr-2" />
+                  Print View
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
-      
+
       <div className="flex space-x-2">
         <button 
-          onClick={handlePdfExport}
+          onClick={handleCsvExport}
           disabled={isExporting || !hasValidData}
           className="afi-btn flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -157,9 +102,9 @@ const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
           ) : (
             <SafeIcon icon={FiDownload} className="mr-2" />
           )}
-          {isExporting ? 'Generating PDF...' : 'Download Full Report as PDF'}
+          {isExporting ? 'Exporting...' : 'Download CSV Report'}
         </button>
-        
+
         <div className="relative">
           <button 
             onClick={toggleDropdown}
@@ -168,7 +113,7 @@ const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
             <SafeIcon icon={FiFilePlus} className="mr-1" />
             <span className="sr-only md:not-sr-only md:inline">More Options</span>
           </button>
-          
+
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white z-10">
               <div className="py-1">
@@ -188,14 +133,6 @@ const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
                   Download as CSV
                 </button>
                 <button 
-                  onClick={openEmailModal}
-                  disabled={!hasValidData}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <SafeIcon icon={FiMail} className="mr-2 text-[#1a2c43]" />
-                  Email Report to Me
-                </button>
-                <button 
                   onClick={handlePrintView}
                   className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
@@ -207,22 +144,16 @@ const ExportOptions = ({ inputs, projections, toggles, openEmailModal }) => {
           )}
         </div>
       </div>
-      
+
       {!hasValidData && (
         <div className="mt-2 text-amber-600 text-sm">
           Please complete the calculator inputs to enable export options.
         </div>
       )}
-      
+
       {exportError && (
         <div className="mt-2 text-[#c0392b] text-sm">
           {exportError}
-          <button 
-            onClick={openEmailModal}
-            className="ml-1 underline font-medium"
-          >
-            Try email delivery
-          </button>
         </div>
       )}
     </div>

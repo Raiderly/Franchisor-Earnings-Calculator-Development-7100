@@ -2,6 +2,13 @@ import { saveAs } from 'file-saver';
 import Papa from 'papaparse';
 import { formatDate } from './formatters';
 
+/**
+ * Export calculator data to CSV file
+ * @param {Object} inputs - Calculator inputs
+ * @param {Array} projections - Calculated projections
+ * @param {Object} toggles - Feature toggles
+ * @returns {Promise} - Promise resolving when CSV is created and downloaded
+ */
 export const exportToCsv = async (inputs, projections, toggles) => {
   // Create data arrays for CSV
   const inputData = formatInputsForCsv(inputs, toggles);
@@ -10,7 +17,7 @@ export const exportToCsv = async (inputs, projections, toggles) => {
   // Combine all data
   const allData = [
     // Header row
-    ['FRANCHISOR EARNINGS CALCULATOR - ACCURATE FRANCHISING INC.'],
+    ['FRANCHISOR EARNINGS CALCULATOR'],
     ['Generated on', new Date().toLocaleDateString()],
     [''],
     
@@ -28,7 +35,7 @@ export const exportToCsv = async (inputs, projections, toggles) => {
   const csv = Papa.unparse(allData);
   
   // Create blob and trigger download
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
   saveAs(blob, `franchisor_earnings_report_${formatDate(new Date())}.csv`);
 };
 

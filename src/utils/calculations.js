@@ -1,3 +1,9 @@
+/**
+ * Calculate financial projections for a franchise business
+ * @param {Object} inputs - Input parameters for calculations
+ * @param {Object} toggles - Toggle switches for optional calculations
+ * @returns {Array} - Array of yearly projection objects
+ */
 export const calculateProjections = (inputs, toggles) => {
   const projections = [];
   
@@ -32,10 +38,8 @@ export const calculateProjections = (inputs, toggles) => {
     const transferIncome = (units / inputs.resaleFreq) * inputs.transferFee;
     
     // Optional revenue streams
-    const supplyChainIncome = toggles.supplyChain ? 
-      units * inputs.supplySpend * (inputs.supplyMarginPct / 100) : 0;
-    const marketingIncome = toggles.marketingIncome ? 
-      units * inputs.avgSales * (inputs.marketingPct / 100) : 0;
+    const supplyChainIncome = toggles.supplyChain ? units * inputs.supplySpend * (inputs.supplyMarginPct / 100) : 0;
+    const marketingIncome = toggles.marketingIncome ? units * inputs.avgSales * (inputs.marketingPct / 100) : 0;
     
     // Master franchise calculations
     let masterFranchiseFees = 0;
@@ -47,6 +51,7 @@ export const calculateProjections = (inputs, toggles) => {
       if (year === 0) {
         masterFranchiseFees = inputs.masterTerritories * inputs.masterFee;
       }
+      
       masterOverrideIncome = (units * inputs.avgSales) * (inputs.masterOngoingPct / 100);
       
       // Adjust royalty and initial fees for master franchise share
@@ -56,9 +61,9 @@ export const calculateProjections = (inputs, toggles) => {
     
     // Calculate gross revenue
     let grossRevenue = adjustedRoyaltyIncome + adjustedInitialFees + renewalFees + 
-                      trainingIncome + trainingRecurringIncome + techIncome + 
-                      supportIncome + transferIncome + supplyChainIncome + 
-                      marketingIncome + masterFranchiseFees + masterOverrideIncome;
+      trainingIncome + trainingRecurringIncome + techIncome + supportIncome + 
+      transferIncome + supplyChainIncome + marketingIncome + 
+      masterFranchiseFees + masterOverrideIncome;
     
     // Calculate costs
     const totalCosts = toggles.includeCosts ? 
