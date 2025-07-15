@@ -7,13 +7,13 @@ const Toggle = ({ label, field, description }) => {
   const isChecked = inputs[field];
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors">
+    <div className="flex items-center justify-between p-3 rounded-lg hover:bg-afi-muted transition-colors">
       <div className="flex-1">
-        <label className="text-sm font-medium text-gray-700 cursor-pointer">
+        <label className="text-sm font-medium text-afi-textPrimary cursor-pointer">
           {label}
         </label>
         {description && (
-          <p className="text-xs text-gray-500 mt-1">{description}</p>
+          <p className="text-xs text-afi-textSecondary mt-1">{description}</p>
         )}
       </div>
       
@@ -24,17 +24,16 @@ const Toggle = ({ label, field, description }) => {
           onChange={(e) => updateField(field, e.target.checked)}
           className="sr-only"
         />
-        <div className={`
-          w-11 h-6 rounded-full transition-colors duration-200 ease-in-out
-          ${isChecked ? 'bg-blue-600' : 'bg-gray-300'}
-        `}>
-          <motion.div 
+        <div
+          className={`
+            w-11 h-6 rounded-full transition-colors duration-200 ease-in-out
+            ${isChecked ? 'bg-afi-secondary' : 'bg-gray-300'}
+          `}
+        >
+          <motion.div
             className="w-5 h-5 rounded-full bg-white shadow-md"
             initial={false}
-            animate={{ 
-              x: isChecked ? 24 : 2,
-              y: 2
-            }}
+            animate={{ x: isChecked ? 24 : 2, y: 2 }}
             transition={{ type: "spring", stiffness: 500, damping: 30 }}
           />
         </div>

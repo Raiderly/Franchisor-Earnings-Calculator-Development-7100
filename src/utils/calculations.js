@@ -28,18 +28,23 @@ export const calculateProjections = (inputs, toggles) => {
     units = Math.max(0, Math.round(units));
     
     // Calculate revenue streams
-    const royaltyIncome = units * inputs.avgSales * (inputs.royaltyPct / 100);
+    const royaltyIncome = units * inputs.avgSales * (inputs.royaltyRate / 100);
     const initialFees = inputs.newUnitsPerYear * inputs.franchiseFee;
-    const renewalFees = (units / inputs.termYears) * inputs.renewalFee;
+    const renewalFees = (units / inputs.franchiseeTerm) * inputs.renewalFee;
     const trainingIncome = inputs.newUnitsPerYear * inputs.trainingFee;
-    const trainingRecurringIncome = units * inputs.trainingAnnualFee;
+    const trainingRecurringIncome = 0; // Not included in inputs but could be added
     const techIncome = units * inputs.techFee * 12;
     const supportIncome = units * inputs.supportFee * 12;
-    const transferIncome = (units / inputs.resaleFreq) * inputs.transferFee;
+    const transferIncome = (units / 10) * inputs.transferFee; // Assume 10% transfer rate
     
     // Optional revenue streams
-    const supplyChainIncome = toggles.supplyChain ? units * inputs.supplySpend * (inputs.supplyMarginPct / 100) : 0;
-    const marketingIncome = toggles.marketingIncome ? units * inputs.avgSales * (inputs.marketingPct / 100) : 0;
+    const supplyChainIncome = toggles.supplyChain 
+      ? units * inputs.supplySpend * (inputs.supplyMargin / 100) 
+      : 0;
+      
+    const marketingIncome = toggles.marketingIncome 
+      ? units * inputs.avgSales * (inputs.marketingLevy / 100) 
+      : 0;
     
     // Master franchise calculations
     let masterFranchiseFees = 0;
@@ -52,28 +57,37 @@ export const calculateProjections = (inputs, toggles) => {
         masterFranchiseFees = inputs.masterTerritories * inputs.masterFee;
       }
       
-      masterOverrideIncome = (units * inputs.avgSales) * (inputs.masterOngoingPct / 100);
+      masterOverrideIncome = (units * inputs.avgSales) * (0.5 / 100); // Assume 0.5% override
       
       // Adjust royalty and initial fees for master franchise share
-      adjustedRoyaltyIncome = royaltyIncome * (inputs.masterRoyaltyPct / 100);
-      adjustedInitialFees = initialFees * (inputs.masterInitPct / 100);
+      adjustedRoyaltyIncome = royaltyIncome * (inputs.masterSplit / 100);
+      adjustedInitialFees = initialFees * (inputs.masterSplit / 100);
     }
     
     // Calculate gross revenue
-    let grossRevenue = adjustedRoyaltyIncome + adjustedInitialFees + renewalFees + 
-      trainingIncome + trainingRecurringIncome + techIncome + supportIncome + 
-      transferIncome + supplyChainIncome + marketingIncome + 
-      masterFranchiseFees + masterOverrideIncome;
+    const grossRevenue = adjustedRoyaltyIncome + 
+                         adjustedInitialFees + 
+                         renewalFees + 
+                         trainingIncome + 
+                         trainingRecurringIncome + 
+                         techIncome + 
+                         supportIncome + 
+                         transferIncome + 
+                         supplyChainIncome + 
+                         marketingIncome + 
+                         masterFranchiseFees + 
+                         masterOverrideIncome;
     
     // Calculate costs
-    const totalCosts = toggles.includeCosts ? 
-      inputs.costStaff + 
-      (inputs.newUnitsPerYear * inputs.costRecruitment) + 
-      (inputs.newUnitsPerYear * inputs.costTraining) + 
-      (units * inputs.costTech * 12) + 
-      inputs.costLegal + 
-      inputs.costMarketingAdmin : 0;
-    
+    const totalCosts = toggles.includeCosts 
+      ? inputs.staffCosts + 
+        (inputs.newUnitsPerYear * inputs.recruitmentCost) + 
+        (inputs.newUnitsPerYear * inputs.trainingCost) + 
+        inputs.techCosts + 
+        inputs.legalCosts + 
+        inputs.marketingAdminCosts
+      : 0;
+      
     const netProfit = grossRevenue - totalCosts;
     
     projections.push({

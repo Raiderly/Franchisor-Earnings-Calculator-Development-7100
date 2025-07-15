@@ -1,19 +1,13 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-// These values will be updated when the user connects their Supabase project
-const SUPABASE_URL = 'https://<PROJECT-ID>.supabase.co'
-const SUPABASE_ANON_KEY = '<ANON_KEY>'
+const supabaseUrl = 'https://gapzhyqiejlgwmycqebn.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhcHpoeXFpZWpsZ3dteWNxZWJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI1NzY2NTgsImV4cCI6MjA2ODE1MjY1OH0.BW-CqK9n2JmfvE_VOegHHLJpcGTqrWuAkyJgaVqX5Ps';
 
-// Error handling for missing credentials
-if (SUPABASE_URL === 'https://<PROJECT-ID>.supabase.co' || SUPABASE_ANON_KEY === '<ANON_KEY>') {
-  console.warn('Missing Supabase credentials. Backend functionality will be limited.');
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
-    autoRefreshToken: true
+    autoRefreshToken: true,
   }
-})
+});
 
-export default supabase
+export default supabase;

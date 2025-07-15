@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --afi-primary: #5E2D91;
+  --afi-secondary: #00B6C4;
+  --afi-accent: #F26B38;
+  --afi-background: #f9f9f9;
+  --afi-text: #333333;
+  --afi-text-light: #666666;
+  --afi-border: #e0e0e0;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -9,54 +19,261 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 400;
   line-height: 1.6;
+  color: var(--afi-text);
+  background-color: var(--afi-background);
 }
 
-#root {
-  width: 100%;
-  min-height: 100vh;
+/* AFI Button Styles */
+.afi-btn {
+  @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 inline-flex items-center justify-center;
+  background-color: var(--afi-primary);
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
-/* Custom components */
-@layer components {
-  .btn-primary {
-    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+.afi-btn:hover {
+  background-color: #4A2473;
+  transform: translateY(-1px);
+}
+
+.afi-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.afi-btn-secondary {
+  @apply afi-btn;
+  background-color: var(--afi-secondary);
+}
+
+.afi-btn-secondary:hover {
+  background-color: #009AA5;
+}
+
+.afi-btn-accent {
+  @apply afi-btn;
+  background-color: var(--afi-accent);
+}
+
+.afi-btn-accent:hover {
+  background-color: #D85A2F;
+}
+
+.afi-btn-outline {
+  @apply afi-btn;
+  background-color: transparent;
+  color: var(--afi-primary);
+  border: 2px solid var(--afi-primary);
+}
+
+.afi-btn-outline:hover {
+  background-color: var(--afi-primary);
+  color: white;
+}
+
+/* AFI Input Styles */
+.afi-input {
+  @apply w-full px-3 py-2 border rounded-lg transition-all duration-200;
+  border-color: var(--afi-border);
+  font-family: 'Open Sans', sans-serif;
+}
+
+.afi-input:focus {
+  outline: none;
+  border-color: var(--afi-primary);
+  box-shadow: 0 0 0 3px rgba(94, 45, 145, 0.1);
+}
+
+/* AFI Card Styles */
+.afi-card {
+  @apply bg-white rounded-xl shadow-sm border;
+  border-color: var(--afi-border);
+}
+
+.afi-card-header {
+  @apply p-6 border-b;
+  border-color: var(--afi-border);
+  background-color: var(--afi-primary);
+  color: white;
+}
+
+.afi-card-body {
+  @apply p-6;
+}
+
+/* AFI Tab Styles */
+.afi-tabs {
+  @apply flex border-b overflow-x-auto;
+  border-color: var(--afi-border);
+}
+
+.afi-tab {
+  @apply px-6 py-3 font-medium transition-all duration-200 whitespace-nowrap;
+  color: var(--afi-text-light);
+  border-bottom: 2px solid transparent;
+}
+
+.afi-tab.active {
+  color: var(--afi-primary);
+  border-bottom-color: var(--afi-primary);
+}
+
+.afi-tab:hover {
+  color: var(--afi-primary);
+}
+
+/* AFI Metric Card Styles */
+.afi-metric-card {
+  @apply afi-card p-6 text-center;
+  background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+}
+
+.afi-metric-card.primary {
+  background: linear-gradient(135deg, var(--afi-primary) 0%, #4A2473 100%);
+  color: white;
+}
+
+.afi-metric-card.secondary {
+  background: linear-gradient(135deg, var(--afi-secondary) 0%, #009AA5 100%);
+  color: white;
+}
+
+.afi-metric-card.accent {
+  background: linear-gradient(135deg, var(--afi-accent) 0%, #D85A2F 100%);
+  color: white;
+}
+
+.afi-metric-icon {
+  @apply w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.afi-metric-title {
+  @apply text-sm font-semibold uppercase tracking-wide mb-2;
+  opacity: 0.9;
+}
+
+.afi-metric-value {
+  @apply text-2xl font-bold mb-1;
+}
+
+.afi-metric-subtitle {
+  @apply text-sm;
+  opacity: 0.8;
+}
+
+/* Tooltip Styles */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-trigger {
+  cursor: help;
+  color: var(--afi-primary);
+}
+
+.tooltip-content {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background-color: var(--afi-primary);
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--afi-primary);
+}
+
+.tooltip-container:hover .tooltip-content {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .afi-metric-value {
+    @apply text-xl;
   }
   
-  .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors;
+  .afi-btn {
+    @apply px-3 py-2 text-sm;
   }
   
-  .input-field {
-    @apply block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
-  }
-  
-  .card {
-    @apply bg-white rounded-xl shadow-lg overflow-hidden;
-  }
-  
-  .card-header {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-700 p-4;
-  }
-  
-  .card-title {
-    @apply text-xl font-bold text-white;
+  .afi-card {
+    @apply rounded-lg;
   }
 }
 
-/* Loading animation */
+/* Chart Container */
+.chart-container {
+  position: relative;
+  height: 400px;
+  margin: 20px 0;
+}
+
+.chart-container canvas {
+  border-radius: 8px;
+}
+
+/* Loading States */
 .loading-spinner {
-  animation: spin 1s linear infinite;
+  @apply inline-block animate-spin rounded-full border-4 border-solid border-current border-r-transparent;
+  width: 24px;
+  height: 24px;
 }
 
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Fixed Header */
+.fixed-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: white;
+  border-bottom: 1px solid var(--afi-border);
+}
+
+/* Scrollable Content */
+.scrollable-content {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.scrollable-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background: var(--afi-primary);
+  border-radius: 3px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: #4A2473;
 }

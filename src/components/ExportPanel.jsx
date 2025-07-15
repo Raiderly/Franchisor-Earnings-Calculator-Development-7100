@@ -2,121 +2,158 @@ import React, { useState } from "react";
 import { useCalculator } from "../context/CalculatorContext";
 import * as FiIcons from "react-icons/fi";
 import SafeIcon from "./common/SafeIcon";
-import { saveAs } from 'file-saver';
-import Papa from 'papaparse';
+import { exportToCsv } from "../utils/csvExport";
+import { motion } from "framer-motion";
 
 const ExportPanel = () => {
   const { calculatedResults, inputs } = useCalculator();
   const [isExporting, setIsExporting] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
 
-  const exportToCSV = async () => {
+  const handleCsvExport = async () => {
     if (!calculatedResults) return;
     
     setIsExporting(true);
-    
     try {
-      const { projections } = calculatedResults;
-      
-      // Prepare data for CSV
-      const csvData = [
-        // Header
-        ['Franchise Earnings Calculator - Export'],
-        ['Generated on', new Date().toLocaleDateString()],
-        [''],
-        
-        // Input Summary
-        ['INPUT PARAMETERS'],
-        ['Current Units', inputs.units],
-        ['Average Sales per Unit', inputs.avgSales],
-        ['Royalty Rate (%)', inputs.royaltyRate],
-        ['Growth Rate (%)', inputs.growthRate],
-        ['Projection Years', inputs.projectionYears],
-        [''],
-        
-        // Projections Header
-        ['FINANCIAL PROJECTIONS'],
-        ['Year', 'Units', 'Total Sales', 'Gross Revenue', 'Total Costs', 'Net Profit', 'Revenue per Unit'],
-        
-        // Projections Data
-        ...projections.map(year => [
-          year.year,
-          year.units,
-          year.totalSales,
-          year.grossRevenue,
-          year.totalCosts,
-          year.netProfit,
-          year.revenuePerUnit
-        ])
-      ];
-      
-      // Convert to CSV
-      const csv = Papa.unparse(csvData);
-      
-      // Download
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      saveAs(blob, `franchise-earnings-projection-${new Date().toISOString().split('T')[0]}.csv`);
-      
+      await exportToCsv(
+        inputs, 
+        calculatedResults.projections, 
+        {
+          includeCosts: inputs.includeCosts,
+          supplyChain: inputs.useSupply,
+          marketingIncome: inputs.marketingLevy > 0,
+          masterFranchise: inputs.useMasterFranchise
+        }
+      );
     } catch (error) {
       console.error('Export failed:', error);
-      alert('Export failed. Please try again.');
     } finally {
       setIsExporting(false);
     }
   };
 
-  const exportToPDF = () => {
-    // Simple print functionality - in a real app you'd use a PDF library
+  const handlePrintView = () => {
     window.print();
   };
 
+  const toggleOptions = () => {
+    setShowOptions(!showOptions);
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 p-4">
-        <h2 className="text-xl font-bold text-white flex items-center">
-          <SafeIcon icon={FiIcons.FiDownload} className="w-5 h-5 mr-2" />
-          Export Results
+    <div className="afi-card print:hidden">
+      <div className="bg-afi-primary text-white p-5 rounded-t-xl">
+        <h2 className="text-xl font-semibold flex items-center">
+          <SafeIcon icon={FiIcons.FiDownload} className="w-5 h-5 mr-2 text-afi-secondary" />
+          Export & Share
         </h2>
+        <p className="text-sm text-gray-300 mt-1">Save your franchise projections for future reference</p>
       </div>
 
-      <div className="p-6 space-y-4">
-        <p className="text-gray-600 text-sm">
-          Export your financial projections for further analysis or reporting.
-        </p>
-
+      <div className="p-6 space-y-5 bg-white rounded-b-xl">
+        {/* Export Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
-            onClick={exportToCSV}
+            onClick={handleCsvExport}
             disabled={!calculatedResults || isExporting}
-            className="flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+            className="afi-btn group max-w-full overflow-hidden"
           >
             {isExporting ? (
-              <SafeIcon icon={FiIcons.FiLoader} className="w-4 h-4 animate-spin" />
+              <>
+                <span className="inline-block w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span className="truncate">Generating Export...</span>
+              </>
             ) : (
-              <SafeIcon icon={FiIcons.FiFileText} className="w-4 h-4" />
+              <>
+                <SafeIcon icon={FiIcons.FiDownload} className="w-5 h-5 mr-2 group-hover:animate-bounce flex-shrink-0" />
+                <span className="truncate">Download CSV Report</span>
+              </>
             )}
-            <span>{isExporting ? 'Exporting...' : 'Export to CSV'}</span>
           </button>
 
           <button
-            onClick={exportToPDF}
-            disabled={!calculatedResults}
-            className="flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-3 rounded-lg font-medium transition-colors"
+            onClick={toggleOptions}
+            className="afi-btn-outline max-w-full overflow-hidden"
           >
-            <SafeIcon icon={FiIcons.FiPrinter} className="w-4 h-4" />
-            <span>Print Report</span>
+            <SafeIcon icon={FiIcons.FiMoreHorizontal} className="w-5 h-5 mr-2 flex-shrink-0" />
+            <span className="truncate">More Options</span>
           </button>
         </div>
 
+        {/* Export Options */}
+        {showOptions && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-4 pt-4 border-t border-gray-200"
+          >
+            <h3 className="text-sm font-semibold text-afi-primary flex items-center">
+              <SafeIcon icon={FiIcons.FiSettings} className="w-4 h-4 mr-2 text-afi-secondary" />
+              Additional Export Options
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                onClick={handlePrintView}
+                className="flex items-center justify-center bg-white border border-gray-300 hover:bg-gray-50 text-afi-primary px-4 py-2.5 rounded-lg font-medium transition-colors max-w-full overflow-hidden"
+              >
+                <SafeIcon icon={FiIcons.FiPrinter} className="w-5 h-5 mr-2 text-afi-secondary flex-shrink-0" />
+                <span className="truncate">Print-Friendly View</span>
+              </button>
+
+              <button
+                onClick={() => window.open('mailto:?subject=Franchise%20Earnings%20Projection&body=Here%20are%20my%20franchise%20projections%20from%20Accurate%20Franchising%20Inc.')}
+                className="flex items-center justify-center bg-white border border-gray-300 hover:bg-gray-50 text-afi-primary px-4 py-2.5 rounded-lg font-medium transition-colors max-w-full overflow-hidden"
+              >
+                <SafeIcon icon={FiIcons.FiMail} className="w-5 h-5 mr-2 text-afi-secondary flex-shrink-0" />
+                <span className="truncate">Email Results</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Export Info */}
         {calculatedResults && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-medium text-gray-800 mb-2">Export includes:</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
-              <li>• All input parameters</li>
-              <li>• {inputs.projectionYears}-year financial projections</li>
-              <li>• Revenue breakdown by stream</li>
-              <li>• Unit growth and sales data</li>
-              {inputs.includeCosts && <li>• Cost analysis and profit margins</li>}
+          <div className="p-4 bg-afi-muted rounded-lg">
+            <h4 className="text-sm font-semibold text-afi-primary mb-2 flex items-center">
+              <SafeIcon icon={FiIcons.FiInfo} className="w-4 h-4 mr-2 text-afi-secondary" />
+              Export Information
+            </h4>
+
+            <ul className="space-y-2">
+              <li className="flex items-start text-sm text-afi-textSecondary">
+                <SafeIcon icon={FiIcons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Complete {inputs.projectionYears}-year franchise financial projection</span>
+              </li>
+              <li className="flex items-start text-sm text-afi-textSecondary">
+                <SafeIcon icon={FiIcons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Detailed revenue breakdown by income stream</span>
+              </li>
+              <li className="flex items-start text-sm text-afi-textSecondary">
+                <SafeIcon icon={FiIcons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                <span>Franchise unit growth and revenue per unit calculations</span>
+              </li>
+              {inputs.includeCosts && (
+                <li className="flex items-start text-sm text-afi-textSecondary">
+                  <SafeIcon icon={FiIcons.FiCheck} className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span>Operating costs and profit margin analysis</span>
+                </li>
+              )}
             </ul>
+
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <a
+                href="https://www.accuratefranchising.com/contact-us/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-afi-primary hover:text-afi-secondary font-medium inline-flex items-center max-w-full overflow-hidden"
+              >
+                <SafeIcon icon={FiIcons.FiMessageSquare} className="w-4 h-4 mr-1.5 flex-shrink-0" />
+                <span className="truncate">Get expert interpretation of your results from AFI</span>
+              </a>
+            </div>
           </div>
         )}
       </div>

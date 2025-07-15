@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
+import { formatCurrency } from '../../utils/formatters';
 
 const RevenuePieChart = ({ projections, toggles }) => {
   if (!projections || projections.length === 0) {
@@ -11,17 +12,14 @@ const RevenuePieChart = ({ projections, toggles }) => {
 
   // Define all possible revenue streams
   const allStreams = [
-    { name: 'Royalty Income', value: currentYear.royaltyIncome || 0, color: '#1a2c43' },
-    { name: 'Initial Franchise Fees', value: currentYear.initialFees || 0, color: '#c0392b' },
-    { name: 'Renewal Fees', value: currentYear.renewalFees || 0, color: '#28a745' },
-    { 
-      name: 'Training Fees', 
-      value: (currentYear.trainingIncome || 0) + (currentYear.trainingRecurringIncome || 0), 
-      color: '#17a2b8' 
+    { name: 'Royalty Income', value: currentYear.royaltyIncome || 0, color: '#262262' }, // Primary AFI navy
+    { name: 'Initial Franchise Fees', value: currentYear.initialFees || 0, color: '#caa74d' }, // AFI gold
+    { name: 'Renewal Fees', value: currentYear.renewalFees || 0, color: '#6366f1' }, // Indigo
+    { name: 'Training Fees', value: (currentYear.trainingIncome || 0) + (currentYear.trainingRecurringIncome || 0), color: '#0ea5e9' // Sky blue
     },
-    { name: 'Technology Fees', value: currentYear.techIncome || 0, color: '#ffc107' },
-    { name: 'Admin/Support Fees', value: currentYear.supportIncome || 0, color: '#6f42c1' },
-    { name: 'Transfer Fees', value: currentYear.transferIncome || 0, color: '#fd7e14' },
+    { name: 'Technology Fees', value: currentYear.techIncome || 0, color: '#10b981' }, // Emerald
+    { name: 'Admin/Support Fees', value: currentYear.supportIncome || 0, color: '#8b5cf6' }, // Violet
+    { name: 'Transfer Fees', value: currentYear.transferIncome || 0, color: '#f59e0b' }, // Amber
   ];
 
   // Add conditional revenue streams
@@ -29,7 +27,7 @@ const RevenuePieChart = ({ projections, toggles }) => {
     allStreams.push({ 
       name: 'Supply Chain Margin', 
       value: currentYear.supplyChainIncome || 0, 
-      color: '#20c997' 
+      color: '#14b8a6' // Teal
     });
   }
 
@@ -37,7 +35,7 @@ const RevenuePieChart = ({ projections, toggles }) => {
     allStreams.push({ 
       name: 'Marketing Levy Income', 
       value: currentYear.marketingIncome || 0, 
-      color: '#e83e8c' 
+      color: '#ec4899' // Pink
     });
   }
 
@@ -45,12 +43,12 @@ const RevenuePieChart = ({ projections, toggles }) => {
     allStreams.push({ 
       name: 'Master Franchise Fees', 
       value: currentYear.masterFranchiseFees || 0, 
-      color: '#6610f2' 
+      color: '#6d28d9' // Purple
     });
     allStreams.push({ 
       name: 'Master Override Income', 
       value: currentYear.masterOverrideIncome || 0, 
-      color: '#795548' 
+      color: '#7c3aed' // Violet
     });
   }
 
@@ -71,52 +69,52 @@ const RevenuePieChart = ({ projections, toggles }) => {
       left: 'center',
       top: 20,
       textStyle: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
-        color: '#1a2c43'
+        fontFamily: 'DM Sans',
+        color: '#262262'
       },
       subtextStyle: {
         fontSize: 14,
-        color: '#6c757d'
+        fontFamily: 'DM Sans',
+        color: '#6b7280'
       }
     },
     tooltip: {
       trigger: 'item',
       formatter: function(params) {
         const percentage = params.percent;
-        const value = new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }).format(params.value);
-        return `<strong>${params.name}</strong><br/>
-                ${value}<br/>
-                ${percentage}% of total revenue`;
+        const value = formatCurrency(params.value);
+        return `<strong>${params.name}</strong><br/> ${value}<br/> ${percentage}% of total revenue`;
       },
-      backgroundColor: 'rgba(0,0,0,0.8)',
-      borderColor: '#1a2c43',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      borderColor: '#e5e7eb',
       borderWidth: 1,
       textStyle: {
-        color: '#fff',
-        fontSize: 12
-      }
+        color: '#262262',
+        fontSize: 12,
+        fontFamily: 'DM Sans'
+      },
+      extraCssText: 'box-shadow: 0 2px 10px rgba(0,0,0,0.1);'
     },
     legend: {
       type: 'scroll',
       orient: 'vertical',
-      right: 20,
-      top: 'middle',
-      itemWidth: 12,
-      itemHeight: 12,
+      right: 10,
+      top: 'center',
+      itemWidth: 10,
+      itemHeight: 10,
+      itemGap: 10,
       textStyle: {
         fontSize: 11,
-        color: '#495057'
+        color: '#262262',
+        fontFamily: 'DM Sans'
       },
       formatter: function(name) {
         const item = chartData.find(d => d.name === name);
         return item ? `${name} (${item.percentage}%)` : name;
-      }
+      },
+      icon: 'circle'
     },
     series: [
       {
@@ -125,11 +123,18 @@ const RevenuePieChart = ({ projections, toggles }) => {
         radius: ['40%', '70%'],
         center: ['35%', '50%'],
         avoidLabelOverlap: false,
+        itemStyle: {
+          borderColor: '#fff',
+          borderWidth: 2
+        },
         emphasis: {
           itemStyle: {
             shadowBlur: 10,
             shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+            shadowColor: 'rgba(0,0,0,0.2)'
+          },
+          label: {
+            show: false
           }
         },
         labelLine: {
@@ -150,14 +155,13 @@ const RevenuePieChart = ({ projections, toggles }) => {
   };
 
   return (
-    <div className="w-full h-96 afi-card p-4">
-      <ReactECharts 
-        option={option} 
-        style={{ height: '100%', width: '100%' }}
-        opts={{ renderer: 'canvas' }}
-        id="revenue-pie-chart"
-      />
-    </div>
+    <ReactECharts
+      option={option}
+      style={{ height: '100%', width: '100%' }}
+      opts={{ renderer: 'canvas' }}
+      id="revenue-pie-chart"
+      className="py-2"
+    />
   );
 };
 

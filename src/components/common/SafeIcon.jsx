@@ -10,9 +10,9 @@ const SafeIcon = ({ icon, name, ...props }) => {
     IconComponent = null;
   }
   
-  return IconComponent ? 
-    React.createElement(IconComponent, props) : 
-    <FiIcons.FiAlertTriangle {...props} />;
+  return IconComponent 
+    ? React.createElement(IconComponent, props) 
+    : <FiIcons.FiAlertTriangle {...props} />;
 };
 
 export default SafeIcon;
